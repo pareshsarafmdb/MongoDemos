@@ -1,0 +1,19 @@
+sh.enableSharding("loc");
+sh.shardCollection("loc.locations", {zipcode:1});
+
+use loc;
+var bulk = db.locations.initializeUnorderedBulkOp();
+for (var i=10000; i < 20000; i++) { bulk.insert({zipcode: i}); }
+bulk.execute();
+var bulk = db.locations.initializeUnorderedBulkOp();
+for (var i=20000; i < 30000; i++) { bulk.insert({zipcode: i}); }
+bulk.execute();
+var bulk = db.locations.initializeUnorderedBulkOp();
+for (var i=30000; i < 40000; i++) { bulk.insert({zipcode: i}); }
+bulk.execute();
+sh.addShardTag("shard0000", "NY");
+sh.addShardTag("shard0001", "NJ");
+sh.addShardTag("shard0002", "SFO");
+sh.addTagRange("loc.locations", {zipcode:10000}, {zipcode:20000}, "NY");
+sh.addTagRange("loc.locations", {zipcode:20001}, {zipcode:30000}, "NJ");
+sh.addTagRange("loc.locations", {zipcode:30001}, {zipcode:40000}, "SFO");
